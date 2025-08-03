@@ -432,59 +432,81 @@ The system follows a microservices architecture with:
 
 ```mermaid
 graph TB
-    subgraph "Infrastructure Layer"
-        API[FastAPI Backend]
-        REDIS[Redis Memory]
-        DB[(PostgreSQL Database)]
-    end
-    
-    subgraph "Multi-Agent Workflow"
-        IS[Intent Seeker]
-        MGR[Manager]
-        TO[Task Orchestrator]
-        DC[Data Collector]
-        TP[Touchpoint]
-    end
-    
+ subgraph Infrastructure_Layer["Infrastructure Layer"]
+        API["FastAPI Backend"]
+        REDIS[("Redis Memory")]
+        DB[("PostgreSQL Database")]
+  end
+
+ subgraph W1["Multi-Agent Workflow"]
+        IS["Intent Seeker"]
+        MGR["Manager"]
+        TO["Task Orchestrator"]
+        DC["Data Collector"]
+        TP["Touchpoint"]
+  end
+
+ subgraph W2["Fallback Workflow"]
+        FB["Touchpoint"]
+  end
+
     %% Infrastructure connections
-    API <--> REDIS
-    REDIS <--> DB
-    API --> IS
-    
+    API <--> DB & W1
+    W1 -.-> W2
+
     %% Workflow connections
+    W2 -.-> API
+    REDIS --> API
     IS --> MGR
     MGR --> TO
     TO --> DC
     DC --> TP
-    TP --> API
-    
-    %% Styling
-    classDef infra fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef agent fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    
+
+    %% All workflow nodes send data to Redis
+    IS & MGR & TO & DC & TP <-.-> REDIS
+
+    %% Styling - Light/Dark mode compatible colors
+    classDef infra fill:#f0f8ff,stroke:#0066cc,stroke-width:2px,color:#000
+    classDef agent fill:#f5f0ff,stroke:#6600cc,stroke-width:2px,color:#000
+    classDef fallback fill:#fff0f0,stroke:#cc0000,stroke-width:2px,color:#000
+
+    %% Defining classes
     class API,REDIS,DB infra
     class IS,MGR,TO,DC,TP agent
+    class FB fallback
 ```
 
 #### Agent Workflow Flow
 
 ```mermaid
 flowchart LR
-    A[User Input] --> B[Intent Seeker]
-    B --> C{Intent Classification}
-    C -->|Greet| D[Touchpoint]
-    C -->|Other Intents| E[Manager]
-    E --> F[Task Orchestrator]
-    F --> G[Data Collector]
-    G --> H{More Tasks?}
-    H -->|Yes| F
-    H -->|No| D
-    D --> I[Response]
+    A[User Input] --> W1
+
+    subgraph W1["Multi-Agent Workflow"]
+        B[Intent Seeker] --> C{Intent Classification}
+        C -->|Greet| D[Touchpoint]
+        C -->|Other Intents| E[Manager]
+        E --> F[Task Orchestrator]
+        F --> G[Data Collector]
+        G --> H{More Tasks?}
+        H -->|Yes| F
+        H -->|No| D
+    end
+
+    subgraph W2["Fallback Workflow"]
+        I["Touchpoint"]
+    end
+
+    W1 --> J[Response]
+    W1 -.-> W2
+    W2 --> J
     
-    style A fill:#e8f5e8
-    style I fill:#e8f5e8
-    style C fill:#fff3e0
-    style H fill:#fff3e0
+    %% Styling - Light/Dark mode compatible
+    style A fill:#e6ffe6,stroke:#006600,stroke-width:2px,color:#000
+    style J fill:#e6ffe6,stroke:#006600,stroke-width:2px,color:#000
+    style C fill:#fff2e6,stroke:#cc6600,stroke-width:2px,color:#000
+    style H fill:#fff2e6,stroke:#cc6600,stroke-width:2px,color:#000
+    style I fill:#ffe6e6,stroke:#cc0000,stroke-width:2px,color:#000
 ```
 
 ## 📄 License
