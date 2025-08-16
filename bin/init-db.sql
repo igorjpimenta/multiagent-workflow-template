@@ -1,4 +1,4 @@
--- PostgreSQL initialization script for Car Assistant local development
+-- PostgreSQL initialization script for the assistant local development
 -- This script runs when the PostgreSQL container starts for the first time
 
 -- Create database if it doesn't exist (handled by POSTGRES_DB env var)

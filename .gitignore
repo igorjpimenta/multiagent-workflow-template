@@ -28,7 +28,7 @@ dist-ssr
 .venv/
 venv/
 .env
-**/bin/
+**/.ip/
 .vscode/
 **.db
 bkp/

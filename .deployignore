@@ -2,7 +2,7 @@
 .env.local
 .env.example
 README.md
-/bin/
+**/.ip/
 /nginx/
 /data/
 **/venv/

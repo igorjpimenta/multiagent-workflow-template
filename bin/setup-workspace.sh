@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Workspace setup script for Car Assistant
+# Workspace setup script
 # This script handles common setup tasks like syncing code and setting up the environment
 
 set -e

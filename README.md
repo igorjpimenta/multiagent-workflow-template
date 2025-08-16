@@ -109,10 +109,10 @@ make run-redis
 
 ```bash
 # Setup workspace
-./scripts/setup_workspace.sh
+./bin/setup-workspace.sh
 
 # Start development environment
-./scripts/local_run.sh
+./bin/local-run.sh
 ```
 
 ### 4. Docker Deployment
@@ -234,7 +234,7 @@ tryout_agents/
 │   ├── api.py                    # FastAPI application
 │   └── main.py                   # Application entry point
 ├── docker/                       # Docker configurations
-├── scripts/                      # Automation scripts
+├── bin/                          # Automation scripts
 ├── internal/                     # Database migrations
 ├── docker-compose.yml            # Service orchestration
 ├── Makefile                      # Development commands

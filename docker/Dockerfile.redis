@@ -14,7 +14,7 @@ RUN mkdir -p /var/log/redis /var/lib/redis /etc/redis /var/lib/redis-stack && \
     chown redis:redis /var/log/redis /var/lib/redis /etc/redis /var/lib/redis-stack
 
 # Copy Redis configuration
-COPY docker/redis.conf /etc/redis/redis.conf
+COPY bin/redis.conf /etc/redis/redis.conf
 RUN chown redis:redis /etc/redis/redis.conf
 
 # Create volume for persistent data
@@ -24,7 +24,7 @@ VOLUME ["/var/lib/redis-stack"]
 EXPOSE ${REDIS_PORT}
 
 # Create startup script to handle password configuration
-COPY docker/start-redis.sh /usr/local/bin/start-redis.sh
+COPY bin/start-redis.sh /usr/local/bin/start-redis.sh
 RUN chmod +x /usr/local/bin/start-redis.sh && chown redis:redis /usr/local/bin/start-redis.sh
 
 # Health check (adjust for password if needed)

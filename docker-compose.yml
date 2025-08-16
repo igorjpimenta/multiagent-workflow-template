@@ -4,8 +4,8 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile.api
-    container_name: agent_api
+      dockerfile: docker/Dockerfile.api
+    container_name: api
     ports:
       - "${PORT}:4000"
     environment:
@@ -30,7 +30,7 @@ services:
   redis:
     build:
       context: .
-      dockerfile: Dockerfile.redis
+      dockerfile: docker/Dockerfile.redis
     container_name: redis
     ports:
       - "6379:6379"
@@ -55,7 +55,7 @@ services:
   postgres:
     build:
       context: .
-      dockerfile: Dockerfile.postgres
+      dockerfile: docker/Dockerfile.postgres
     container_name: postgres
     ports:
       - "${DB_PORT}:5432"
@@ -67,7 +67,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./bin/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     env_file:
       - .env
     healthcheck:

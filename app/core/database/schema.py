@@ -6,7 +6,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import String, Text, ForeignKey, TIMESTAMP, func
 from sqlalchemy.dialects.postgresql import JSONB
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Any
 import uuid
 import logging
 
@@ -37,7 +37,7 @@ class Session(Base):
         onupdate=func.now()
     )
     status: Mapped[str] = mapped_column(String(50), default="active")
-    meta_data: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+    meta_data: Mapped[Optional[dict[str, Any]]] = mapped_column(
         JSONB,
         name="metadata",
         nullable=True
@@ -71,7 +71,7 @@ class Message(Base):
         TIMESTAMP,
         default=func.now()
     )
-    meta_data: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+    meta_data: Mapped[Optional[dict[str, Any]]] = mapped_column(
         JSONB,
         name="metadata",
         nullable=True

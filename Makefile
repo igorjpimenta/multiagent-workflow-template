@@ -46,40 +46,40 @@ help:
 # Development commands
 run:
 	@echo "🚀 Starting all services..."
-	cd $(SCRIPT_DIR) && ./scripts/setup_workspace.sh && cd $(PROJECT_ROOT) && ./scripts/local_run.sh
+	cd $(SCRIPT_DIR) && ./bin/setup-workspace.sh && cd $(PROJECT_ROOT) && ./bin/local-run.sh
 
 run-api:
 	@echo "🚀 Starting API development server..."
-	cd $(SCRIPT_DIR) && ./scripts/setup_workspace.sh && cd $(PROJECT_ROOT) && ./scripts/local_run.sh --no-postgres --no-redis
+	cd $(SCRIPT_DIR) && ./bin/setup-workspace.sh && cd $(PROJECT_ROOT) && ./bin/local-run.sh --no-postgres --no-redis
 
 run-postgres:
 	@echo "🚀 Starting Postgres container..."
-	cd $(SCRIPT_DIR) && ./scripts/local_run.sh --no-api --no-redis
+	cd $(SCRIPT_DIR) && ./bin/local-run.sh --no-api --no-redis
 
 run-redis:
 	@echo "🚀 Starting Redis container..."
-	cd $(SCRIPT_DIR) && ./scripts/local_run.sh --no-api --no-postgres
+	cd $(SCRIPT_DIR) && ./bin/local-run.sh --no-api --no-postgres
 
 # Build commands
 build:
 	@echo "🏗️  Building all Docker images..."
-	docker compose build
+	docker compose -f docker-compose.yml --env-file .env build
 
 build-api:
 	@echo "🏗️  Building API Docker image..."
-	docker compose build api
+	docker compose -f docker-compose.yml --env-file .env build api
 
 build-redis:
 	@echo "🏗️  Building Redis Docker image..."
-	docker compose build redis
+	docker compose -f docker-compose.yml --env-file .env build redis
 
 build-postgres:
 	@echo "🏗️  Building Postgres Docker image..."
-	docker compose build postgres
+	docker compose -f docker-compose.yml --env-file .env build postgres
 
 up:
 	@echo "🐳 Starting all Docker containers..."
-	docker compose up --build --remove-orphans -d
+	docker compose -f docker-compose.yml --env-file .env up --build --remove-orphans -d
 
 down:
 	@echo "🐳 Stopping Docker containers..."
@@ -118,38 +118,38 @@ migration-create:
 		exit 1; \
 	fi
 	@echo "📝 Creating new migration: $(MESSAGE)"
-	cd $(SCRIPT_DIR) && ./scripts/setup_workspace.sh --build && cd $(PROJECT_ROOT) && ./scripts/migrate.sh create "$(MESSAGE)"
+	cd $(SCRIPT_DIR) && ./bin/setup-workspace.sh --build && cd $(PROJECT_ROOT) && ./bin/migrate.sh create "$(MESSAGE)"
 	migration-copy
 	@echo "🎉 Migration created successfully"
 	@echo "🔍 To apply the migration, run: make migration-upgrade"
 
 migration-init:
 	@echo "🗄️  Initializing database with all migrations..."
-	cd $(SCRIPT_DIR) && ./scripts/setup_workspace.sh --build && cd $(PROJECT_ROOT) && ./scripts/migrate.sh init
+	cd $(SCRIPT_DIR) && ./bin/setup-workspace.sh --build && cd $(PROJECT_ROOT) && ./bin/migrate.sh init
 
 migration-upgrade:
 	@echo "⬆️  Upgrading database to latest migration..."
-	cd $(SCRIPT_DIR) && ./scripts/setup_workspace.sh --build && cd $(PROJECT_ROOT) && ./scripts/migrate.sh upgrade
+	cd $(SCRIPT_DIR) && ./bin/setup-workspace.sh --build && cd $(PROJECT_ROOT) && ./bin/migrate.sh upgrade
 
 migration-downgrade:
 	@echo "⬇️  Downgrading database to previous migration..."
-	cd $(SCRIPT_DIR) && ./scripts/setup_workspace.sh --build && cd $(PROJECT_ROOT) && ./scripts/migrate.sh downgrade $(REVISION)
+	cd $(SCRIPT_DIR) && ./bin/setup-workspace.sh --build && cd $(PROJECT_ROOT) && ./bin/migrate.sh downgrade $(REVISION)
 
 migration-current:
 	@echo "📍 Checking current database revision..."
-	cd $(SCRIPT_DIR) && ./scripts/setup_workspace.sh && cd $(PROJECT_ROOT) && ./scripts/migrate.sh current
+	cd $(SCRIPT_DIR) && ./bin/setup-workspace.sh && cd $(PROJECT_ROOT) && ./bin/migrate.sh current
 
 migration-history:
 	@echo "📜 Showing migration history..."
-	cd $(SCRIPT_DIR) && ./scripts/setup_workspace.sh && cd $(PROJECT_ROOT) && ./scripts/migrate.sh history
+	cd $(SCRIPT_DIR) && ./bin/setup-workspace.sh && cd $(PROJECT_ROOT) && ./bin/migrate.sh history
 
 migration-check:
 	@echo "🔍 Checking database migration status..."
-	cd $(SCRIPT_DIR) && ./scripts/setup_workspace.sh && cd $(PROJECT_ROOT) && ./scripts/migrate.sh check
+	cd $(SCRIPT_DIR) && ./bin/setup-workspace.sh && cd $(PROJECT_ROOT) && ./bin/migrate.sh check
 
 migration-copy:
 	@echo "📋 Copying migration files from environment to project..."
-	cd $(SCRIPT_DIR) && ./scripts/copy_migrations.sh
+	cd $(SCRIPT_DIR) && ./bin/copy-migrations.sh
 
 clean:
 	@echo "🧹 Cleaning up temporary files and Docker resources..."

@@ -1,7 +1,7 @@
 import logging
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Any, Dict, Type, Literal, TypedDict
+from typing import Any, Type, Literal, TypedDict
 from datetime import datetime
 
 from ..schema import Base
@@ -25,7 +25,7 @@ class PersistenceResult(TypedDict):
     """
     operation: Literal["create", "update", "delete"]
     id: str
-    changes: Dict[str, Any]
+    changes: dict[str, Any]
     has_changes: bool
 
 
@@ -35,7 +35,7 @@ class RecordPersistence:
         cls,
         db: AsyncSession,
         table_model: Type[Base],
-        record_dict: Dict[str, Any],
+        record_dict: dict[str, Any],
         record_id: str,
         id_field: str = "id"
     ) -> RecordChanges:
@@ -74,10 +74,10 @@ class RecordPersistence:
         # Get the existing record from database
         query = select(table_model) \
             .where(getattr(table_model, id_field) == record_id)
-        result = await db.execute(query)
-        existing_record = result.scalar_one_or_none()
+        existing_record = await db.execute(query)
+        record = existing_record.scalar_one_or_none()
 
-        if not existing_record:
+        if not record:
             logger.warning(
                 f"Record with {id_field}={record_id} not found in "
                 f"{table_model.__tablename__}. Creating instead."
@@ -90,7 +90,7 @@ class RecordPersistence:
             )
 
         # Convert existing record to dictionary
-        existing_dict = cls._convert_record_to_dict(existing_record)
+        existing_dict = cls._convert_record_to_dict(record)
 
         # Compare records and find changes
         changes, _, _ = cls._compare_field_values(
@@ -109,9 +109,9 @@ class RecordPersistence:
         cls,
         db: AsyncSession,
         table_model: Type[Base],
-        records_list: list[Dict[str, Any]],
+        records_list: list[dict[str, Any]],
         id_field: str = "id"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Compare multiple dictionary records with existing records in a
         database table.
@@ -127,7 +127,7 @@ class RecordPersistence:
             Dictionary with record IDs as keys and change dictionaries
             as values
         """
-        results: Dict[str, Any] = {}
+        results: dict[str, Any] = {}
 
         for record_dict in records_list:
             if id_field not in record_dict:
@@ -155,9 +155,9 @@ class RecordPersistence:
     @classmethod
     def _compare_field_values(
         cls,
-        record_dict: Dict[str, Any],
-        existing_dict: Dict[str, Any]
-    ) -> tuple[Dict[str, Dict[str, Any]], Dict[str, Any], list[str]]:
+        record_dict: dict[str, Any],
+        existing_dict: dict[str, Any]
+    ) -> tuple[dict[str, dict[str, Any]], dict[str, Any], list[str]]:
         """
         Compare field values and return changes, new fields, unchanged fields.
 
@@ -202,7 +202,7 @@ class RecordPersistence:
         return changes, new_fields, unchanged_fields
 
     @staticmethod
-    def _convert_record_to_dict(record: Base) -> Dict[str, Any]:
+    def _convert_record_to_dict(record: Base) -> dict[str, Any]:
         """
         Convert SQLAlchemy record to dict with proper datetime handling.
 

@@ -1,6 +1,6 @@
 # flake8: noqa: E501
 """
-Chat endpoints for the car assistant.
+Chat endpoints.
 """
 
 import uuid

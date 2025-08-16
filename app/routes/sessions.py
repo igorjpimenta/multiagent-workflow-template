@@ -26,8 +26,8 @@ async def get_sessions(
     db: AsyncSession = Depends(get_db)
 ):
     """Get all sessions"""
-    result = await db.execute(select(Session))
-    sessions = result.scalars().all()
+    existing_sessions = await db.execute(select(Session))
+    sessions_records = existing_sessions.scalars().all()
 
     return [
         SessionResponse(
@@ -37,7 +37,7 @@ async def get_sessions(
             status=session.status,
             metadata=session.meta_data
         )
-        for session in sessions
+        for session in sessions_records
     ]
 
 
@@ -73,20 +73,20 @@ async def get_session(
     db: AsyncSession = Depends(get_db)
 ):
     """Get session by ID"""
-    result = await db.execute(
+    existing_session = await db.execute(
         select(Session).where(Session.id == session_id)
     )
-    session = result.scalar_one_or_none()
+    session_record = existing_session.scalar_one_or_none()
 
-    if not session:
+    if not session_record:
         raise HTTPException(status_code=404, detail="Session not found")
 
     return SessionResponse(
-        id=session.id,
-        created_at=session.created_at,
-        updated_at=session.updated_at,
-        status=session.status,
-        metadata=session.meta_data
+        id=session_record.id,
+        created_at=session_record.created_at,
+        updated_at=session_record.updated_at,
+        status=session_record.status,
+        metadata=session_record.meta_data
     )
 
 
@@ -99,12 +99,12 @@ async def get_session_messages(
     db: AsyncSession = Depends(get_db)
 ):
     """Get all messages for a session"""
-    result = await db.execute(
+    existing_messages = await db.execute(
         select(Message)
         .where(Message.session_id == session_id)
         .order_by(Message.timestamp)
     )
-    messages = result.scalars().all()
+    messages_records = existing_messages.scalars().all()
 
     return [
         SessionMessagesResponse(
@@ -115,7 +115,7 @@ async def get_session_messages(
             timestamp=message.timestamp,
             metadata=message.meta_data
         )
-        for message in messages
+        for message in messages_records
     ]
 
 
@@ -127,11 +127,11 @@ async def delete_session(
     """Delete a session and its messages"""
     # Delete messages first (handled by cascade)
     # Delete session
-    result = await db.execute(
+    existing_session = await db.execute(
         delete(Session).where(Session.id == session_id)
     )
 
-    if result.rowcount == 0:
+    if existing_session.rowcount == 0:
         raise HTTPException(status_code=404, detail="Session not found")
 
     await db.commit()
