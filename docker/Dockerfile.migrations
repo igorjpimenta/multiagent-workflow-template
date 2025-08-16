@@ -1,0 +1,51 @@
+# Migrations Dockerfile
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    curl \
+    pipenv \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set environment variable for pipenv
+ENV PIPENV_VENV_IN_PROJECT=1
+ENV PYTHONPATH=/app
+
+RUN echo "[packages]" > Pipfile && \
+    echo "alembic = \"==1.14.0\"" >> Pipfile && \
+    echo "sqlalchemy = {extras = [\"asyncio\"], version = \"==2.0.36\"}" >> Pipfile && \
+    echo "psycopg2-binary = \"==2.9.10\"" >> Pipfile && \
+    echo "pydantic = \"==2.11.5\"" >> Pipfile && \
+    echo "pydantic-settings = \"==2.9.1\"" >> Pipfile && \
+    echo "pydantic-core = \"==2.33.2\"" >> Pipfile && \
+    echo "" >> Pipfile && \
+    echo "[requires]" >> Pipfile && \
+    echo "python_version = \"3.12\"" >> Pipfile
+
+# Install Python dependencies
+RUN pip install --upgrade pip && \
+    pip install pipenv && \
+    pipenv install
+
+COPY internal/store/alembic.ini ./internal/store/alembic.ini
+COPY internal/store/migrations ./internal/store/migrations
+COPY app/__init__.py ./app/__init__.py
+COPY app/core/__init__.py ./app/core/__init__.py
+COPY app/core/database/__init__.py ./app/core/database/__init__.py
+COPY app/core/database/schema.py ./app/core/database/schema.py
+COPY app/core/database/db.py ./app/core/database/db.py
+COPY app/core/config/__init__.py ./app/core/config/__init__.py
+COPY app/core/config/settings.py ./app/core/config/settings.py
+
+# Create non-root user for security
+RUN groupadd -r appuser && \
+    useradd -r -g appuser -d /app -s /sbin/nologin appuser && \
+    chown -R appuser:appuser /app
+
+USER appuser
+
+CMD ["pipenv", "run", "alembic", "-c", "./internal/store/alembic.ini", "upgrade", "head"]

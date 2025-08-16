@@ -235,8 +235,10 @@ tryout_agents/
 │   └── main.py                   # Application entry point
 ├── docker/                       # Docker configurations
 ├── bin/                          # Automation scripts
-├── internal/                     # Database migrations
+├── internal/store/migrations     # Database migrations
 ├── docker-compose.yml            # Service orchestration
+├── docker-compose.override.yml   # Service overriding settings
+├── .env.example                  # Environment variables template
 ├── Makefile                      # Development commands
 └── Pipfile                       # Python dependencies
 ```
