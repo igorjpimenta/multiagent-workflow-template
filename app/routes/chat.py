@@ -5,6 +5,7 @@ Chat endpoints.
 
 import uuid
 import logging
+import traceback
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -100,7 +101,12 @@ async def chat(
 
     except Exception as e:
         await db.rollback()
-        logger.error(f"Error processing chat message: {e}")
+
         raise HTTPException(
-            status_code=500, detail=f"Error processing message: {str(e)}"
+            status_code=500,
+            detail={
+                "session_id": session_id if 'session_id' in locals() else None,
+                "user_message": request.message,
+                "traceback": traceback.format_exc().splitlines(),
+            },
         )

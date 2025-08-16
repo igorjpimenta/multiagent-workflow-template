@@ -46,7 +46,7 @@ def _get_touchpoint_prompt(state: State) -> str:
     """Get touchpoint prompt"""
 
     return TOUCHPOINT_PROMPT.format(
-        inquiry=state["current_inquiry"],
+        inquiry=state.get("current_inquiry", "Failed to get inquiry"),
         current_date=get_current_date(),
         collected_data=(
             "\n\n".join(

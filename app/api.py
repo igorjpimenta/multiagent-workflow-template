@@ -9,9 +9,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .core.config.logging import setup_logging
 from .core.config.settings import get_settings
+from .core.config.instructor import instructor_client, llm_name
 from .core.database.db import db_manager
+from .core.models.messages import HMessage
 from .core.agent import get_assistant
 from .routes import chat, health, sessions
+from . import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +32,22 @@ async def lifespan(app: FastAPI):
         logger.error(f"❌ Failed to initialize database: {e}")
         raise
 
-    # Initialize memory manager and assistant
+    try:
+        instructor_client.chat.completions.create(
+            model=str(llm_name),
+            response_model=str,
+            messages=[
+                HMessage(
+                    name="test",
+                    content="Hello, how are you?"
+                ).to_instructor_message()
+            ]
+        )
+        logger.info("✅ Instructor client initialized successfully")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize instructor client: {e}")
+        raise
+
     try:
         await get_assistant()
         logger.info("✅ Memory-enabled assistant initialized successfully")
@@ -48,6 +66,7 @@ app = FastAPI(
     title="Assistant API",
     description="A general conversational AI assistant",
     version="0.1.0",
+    debug=settings.DEBUG,
     docs_url="/docs" if settings.DEBUG else None,
     redoc_url="/redoc" if settings.DEBUG else None,
     lifespan=lifespan
@@ -71,6 +90,6 @@ if settings.DEBUG:
         """Root endpoint"""
         return {
             "message": "Assistant API",
-            "version": "0.1.0",
+            "version": __version__,
             "docs": "/docs"
         }
